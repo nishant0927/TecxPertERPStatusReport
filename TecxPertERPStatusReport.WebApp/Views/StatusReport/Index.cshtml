@@ -1,0 +1,337 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<style>
+    table, th, td {
+        border-collapse: collapse !important;
+        font-size: 12px !important;
+    }
+
+    .table > thead > tr > th {
+        padding: 2px !important;
+    }
+</style>
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+            ERP Status At Cattle Feed Plant
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="#">Tables</a></li>
+            <li class="active">Data tables</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="box">
+                    <div class="table-responsive">
+                        <table id="tblERPStatusCattle" class="table table-hover table-striped table-condensed table-bordered table-sm" width="100%">
+                            <thead class="thead-dark">
+                                <tr id="tblheadRow">
+                                </tr>
+                            </thead>
+                            <tbody id="tblBody" class="table-striped"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box-footer">
+            <div class="row">
+                <div class="col-sm-2 text-right">
+                    <button class="btn btn-sm btn-primary" id="btnReload">Reload</button>
+                </div>
+                <!--<div class="col-sm-2">
+                    <button class="btn btn-sm btn-primary" id="exportPDF">PDF</button>-->
+                    @*<div class="dropdown">
+                        <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Export
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" href="#" id="exportExcel">Excel</a>
+                            <a class="dropdown-item" href="#" id="exportPDF">PDF</a>
+                        </div>
+                    </div>*@
+                <!--</div>-->
+                
+
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            GetCattelFeedData();
+
+        })
+
+        $("#btnReload").on('click', function () {
+            GetCattelFeedData();
+        })
+
+        function GetCattelFeeds(header, data) {
+            var tblHeaderRow = document.getElementById("tblheadRow");
+            tblHeaderRow.innerHTML = '';
+            tblHeaderRow.innerHTML += '<th>Sl No</th>';
+            header.forEach(function (columnName, index) {
+                if (index !== 0) {
+                    tblHeaderRow.innerHTML += '<th>' + columnName + '<br><input type="text" class="column-search-input" data-column="' + index + '" placeholder="Search ' + columnName + '"/>' + '</th>';
+                }
+                //if (index === 0) {
+                //    tblHeaderRow.innerHTML += '<th>' + columnName + '</th>';
+                //} else {
+                //    tblHeaderRow.innerHTML += '<th>' + columnName + '<br><input type="text" class="column-search-input" data-column="' + index + '" placeholder="Search ' + columnName + '"/>'+'</th>';
+                //}
+            });
+
+            var tblBody = document.getElementById("tblBody");
+            tblBody.innerHTML = '';
+            //data.forEach(function (row) {
+            //    var rowHtml = '<tr>'; 
+            data.forEach(function (row, rowIndex) {
+                var rowHtml = '<tr>';
+                // Add SlNo column
+                rowHtml += '<td>' + (rowIndex + 1) + '</td>';
+                for (var prop in row) {
+                    if (row.hasOwnProperty(prop) && row[prop] !== null && row[prop] !== undefined) {
+                        rowHtml += '<td>' + row[prop] + '</td>';
+                    }
+                }
+                rowHtml += '</tr>';
+                tblBody.innerHTML += rowHtml;
+            });
+            //// Add event listener for PDF export
+            //document.getElementById('exportPDF').addEventListener('click', function () {
+            //    exportToPDF('tblERPStatusCattle');
+            //});
+            var dataTable = $('#tblERPStatusCattle').DataTable({
+                ordering: false, 
+                paging: false,   
+                info: false,     
+                searching: true,
+                initComplete: function () {
+                    this.api().columns().every(function () {
+                        var column = this;
+                        var columnIndex = column.index();
+
+                        // Event listener for user input
+                        $('input.column-search-input', column.header()).on('keyup change clear', function () {
+                            if (column.search() !== this.value) {
+                                column.search(this.value).draw();
+                            }
+                        });
+                    });
+                },
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        text: 'Export to Excel'
+                    },
+                    {
+                        text: 'Export to PDF',
+                        action: function () {
+                            exportToPDF('tblERPStatusCattle');
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print'
+                    }
+                ]
+                //buttons: [
+                //    'excel', 'pdf', 'print'                    
+                //]
+            });
+        }      
+
+        function ChangeformatDate(dateString) {
+            // Check if dateString is defined and not null
+            if (dateString && typeof dateString === 'string') {
+                // Extract the timestamp from the input string
+                var match = dateString.match(/\/Date\((\d+)\)\//);
+
+                if (match && match[1]) {
+                    // Create a new Date object using the extracted timestamp
+                    var date = new Date(parseInt(match[1]));
+
+                    // Check if the date is valid
+                    if (!isNaN(date.getTime())) {
+                        // Format the date as dd-mm-yyyy
+                        var day = date.getDate().toString().padStart(2, '0');
+                        var month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based
+                        var year = date.getFullYear();
+
+                        return day + '-' + month + '-' + year;
+                    } else {
+                        console.error("Invalid date format in dateString:", dateString);
+                        return " ";
+                    }
+                } else {
+                    console.error("Invalid date format in dateString:", dateString);
+                    return " ";
+                }
+            } else {
+                console.error("dateString is undefined or not a string.");
+                return " ";
+            }
+        }
+
+        function GetCattelFeedData() {
+            var header = ["SNo", "Location", "Last Gate In Date", "Last Weighment Date", "Last QC Date", "Last SRN Date", "Last Purchase Invoice Date", "Last Advance Receipt Date", "Last Production Entry Date", "Last Dispatch Date", "Last Sale Bill Date"];
+            $.ajax({
+                url: "/StatusReport/GetCattelFeeds",
+                type: "GET",
+                // data: { requestType: forward },
+                cache: false,
+                success: function (result) {
+                    var filteredData = result.map(function (row, index) {
+                        return {
+                            //'SNO': index + 1,
+                            'Location': row.Location,
+                            'Last Gate In Date': ChangeformatDate(row.LastGateInDate),
+                            'Last Weighment Date': ChangeformatDate(row.LastWeighmentDate),
+                            'Last QC Date': ChangeformatDate(row.LastQCDate),
+                            'Last SRN Date': ChangeformatDate(row.LastSRNDate),
+                            'Last Purchase Invoice Date': ChangeformatDate(row.LastPurchaseInvoiceDate),
+                            'Last Advance Receipt Date': ChangeformatDate(row.LastAdvanceReceiptDate),
+                            'Last Production Entry Date': ChangeformatDate(row.LastProductionEntryDate),
+                            'Last Dispatch Date': ChangeformatDate(row.LastDispatchDate),
+                            'Last Sale Bill Date': ChangeformatDate(row.LastSaleBillDate)
+                        };
+                    });
+                    GetCattelFeeds(header, filteredData);
+                },
+                error: function (errorMessage) {
+                    alert(errorMessage);
+                }
+            })
+        }
+
+        function exportToExcel(tableId) {
+
+            var table = document.getElementById(tableId);
+
+            // Create a worksheet object
+            var ws = XLSX.utils.table_to_sheet(table);
+
+            // Copy cell styles from the table to the worksheet
+            for (var i = 0; i < table.rows.length; i++) {
+                var row = table.rows[i];
+                for (var j = 0; j < row.cells.length; j++) {
+                    var cell = row.cells[j];
+                    var cellAddress = XLSX.utils.encode_cell({ r: i, c: j });
+
+                    // Copy styles (adjust as needed)
+                    ws[cellAddress].s = {
+                        font: { sz: 12, bold: false, color: { rgb: "FF000000" } }, // Example font styles
+                        alignment: { horizontal: "left", vertical: "middle" }, // Example alignment styles
+                        border: { left: { style: "thin", color: { auto: 1 } }, right: { /*...*/ }, top: { /*...*/ }, bottom: { /*...*/ } } // Example border styles
+                        // Add other style properties as needed
+                    };
+
+                    // Copy content
+                    ws[cellAddress].v = cell.innerText || cell.textContent || "";
+                }
+            }
+
+            // Create a workbook with the customized worksheet
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+            // Save the workbook to a file
+            XLSX.writeFile(wb, 'exported_data.xlsx');
+
+
+
+            //var table = document.getElementById(tableId);
+
+            //// Create a worksheet object
+            //var ws = XLSX.utils.table_to_sheet(table);
+
+            //// Customize cell formatting
+            //ws['!cols'] = []; // Initialize column formatting array
+            //for (var i = 0; i < table.rows[0].cells.length; i++) {
+            //    // Customize formatting for each column (adjust as needed)
+            //    ws['!cols'].push({ wch: 15 }); // Set the width of each column to 15 characters
+            //}
+
+            //// Create a workbook with the customized worksheet
+            //var wb = XLSX.utils.book_new();
+            //XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+            //// Save the workbook to a file
+            //XLSX.writeFile(wb, 'exported_data.xlsx');
+            //var table = document.getElementById(tableId);
+            //var workbook = XLSX.utils.table_to_book(table);
+            //XLSX.writeFile(workbook, 'exported_data.xlsx');
+        }
+
+        function exportToPDF(tableId) {
+            var table = $('#' + tableId).clone(); 
+
+            // Remove input elements from the cloned table
+            table.find('thead input, thead br').remove();
+            // Remove the first th (header) element
+            table.find('thead tr th:first-child').remove();
+
+            // Remove the first td (data) element from each row
+            table.find('tbody tr td:first-child').remove();
+
+            // Add Sl No header cell
+            table.find('thead tr').prepend('<th>Sl No</th>');
+
+            // Add Sl No values to each row
+            table.find('tbody tr').each(function (index) {
+                $(this).prepend('<td>' + (index + 1) + '</td>');
+            });
+
+            // Apply minimal styles
+            table.css('border-collapse', 'collapse');
+
+            // Apply styles only to th elements
+            table.find('th').css({
+                'border': '1px solid #000',
+                'padding': '8px',
+                'font-size': '12px',
+                'width':'2px'
+            });
+
+            // Apply styles only to td elements
+            table.find('td').css({
+                'border': '1px solid #000',
+                'padding': '8px',
+                'font-size': '12px'
+            });
+
+            // Send the HTML content to the server for PDF generation
+            $.ajax({
+                url: '/StatusReport/GeneratePDF',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ htmlContent: table[0].outerHTML }), // Send the modified HTML content directly
+                xhrFields: {
+                    responseType: 'blob' // Set the expected response type to blob
+                },
+                success: function (data) {
+                    var blob = new Blob([data], { type: 'application/pdf' });
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = "PrintPO.pdf";
+                    link.click();
+                },
+                error: function (error) {
+                    console.error('Error generating PDF:', error);
+                }
+            });            
+        }                                    
+    </script>
+}
+

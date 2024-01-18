@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <link href="~/Scripts/adminlte/components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/adminlte/css/alt/AdminLTE-bootstrap-social.min.css" rel="stylesheet" />
+    <link href="~/Content/adminlte/css/alt/AdminLTE-fullcalendar.css" rel="stylesheet" />
+    <link href="~/Content/adminlte/css/alt/AdminLTE-without-plugins.min.css" rel="stylesheet" />
+    <link href="~/Content/adminlte/css/AdminLTE.min.css" rel="stylesheet" />
+    <link href="~/Scripts/adminlte/components/bootstrap/dist/css/bootstrap-theme.min.css" rel="stylesheet" />
+    <link href="~/Content/DataTable/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="~/Content/DataTable/buttons.dataTables.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="wrapper">
+
+        @Html.Partial("_Header")
+
+        @Html.Partial("_Sidebar")
+
+
+        @RenderBody()
+
+        @Html.Partial("_Footer")
+
+        @Html.Partial("_Aside")
+        <!-- Add the sidebar's background. This div must be placed
+        immediately after the control sidebar -->
+        <div class="control-sidebar-bg"></div>
+    </div>
+
+    <script src="~/Scripts/DataTable/jquery-3.7.0.js"></script>
+    @*<script src="~/Scripts/adminlte/components/jquery/dist/jquery.slim.js"></script>*@
+    <script src="~/Scripts/adminlte/components/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/Scripts/adminlte/components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="~/Scripts/DataTable/jquery.dataTables.min.js"></script>
+    <script src="~/Scripts/DataTable/dataTables.buttons.min.js"></script>
+    <script src="~/Scripts/DataTable/jszip.min.js"></script>
+    <script src="~/Scripts/DataTable/pdfmake.min.js"></script>
+    <script src="~/Scripts/DataTable/vfs_fonts.js"></script>
+    <script src="~/Scripts/DataTable/buttons.html5.min.js"></script>
+    <script src="~/Scripts/DataTable/buttons.print.min.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>
